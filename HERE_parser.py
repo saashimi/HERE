@@ -20,11 +20,13 @@ def main():
     
     for csv_file in os.listdir(drive_path):
         df_temp = pd.read_csv(
-                    os.path.join(os.path.dirname(__file__), drive_path + csv_file))
+                    os.path.join(
+                        os.path.dirname(__file__), drive_path + csv_file))
         
         df_temp = df_temp[df_temp['EPOCH-15MIN'].isin([30, 31, 32, 33, 34])] 
         # Epoch 07:30 - 08:30 
         df = pd.concat([df, df_temp])
+        print('Adding {} to dataset.'.format(csv_file))
 
     
     """
@@ -35,6 +37,7 @@ def main():
     endTime = dt.datetime.now()
     
     print("Script finished in {0}.".format(endTime - startTime))
+    print(df.shape)
 
 if __name__ == '__main__':
     main()
