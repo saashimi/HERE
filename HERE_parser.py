@@ -8,19 +8,6 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 
-# Conversion factors
-KPM_TO_MPH = 0.621371
-METERS_TO_MILES = 0.000621371
-
-
-def speed_to_travel_time(length, speed):
-    """
-    Converts speeds to travel time.
-    Args: Segment length, speed
-    """
-    travel_time = (length * 60) / speed
-    return travel_time
-
 
 def group_TMC(df_tmc):
     """Groups by TMC and aggregates average speeds.
@@ -28,6 +15,8 @@ def group_TMC(df_tmc):
     Returns: df_tmc, a pandas dataframe grouped by TMC.
     """
     tmc_operations = ({'MEAN': 'mean',
+                       'MEAN_5': lambda x: np.percentile(x, .05),
+                       'MEAN_95': lambda x: np.percentile(x, .95),
                        'FREEFLOW': 'mean',
                        'CONFIDENCE': 'mean'})
     df_tmc = df_tmc.groupby('TMC', as_index=False).agg(tmc_operations)
@@ -53,16 +42,13 @@ def main():
         df = pd.concat([df, df_temp])
         print('Adding {} to dataset.'.format(csv_file))
 
-    """
-    df = pd.read_csv(os.path.join(os.path.dirname(__file__), drive_path + 'HERE_DA_15674.csv'))
-    df = df[df['EPOCH-15MIN'].isin([30, 31, 32, 33, 34])] # Epoch 07:30 - 08:30 
-    """    
-
+    df['MEAN_95'] = df['MEAN']
+    df['MEAN_5'] = df['MEAN']
     df = group_TMC(df)
     endTime = dt.datetime.now()
-    
-    print("Script finished in {0}.".format(endTime - startTime))
+   
     print(df)
+    print("Script finished in {0}.".format(endTime - startTime))
     print(df.shape)
 
 
