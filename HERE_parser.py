@@ -31,6 +31,9 @@ def group_TMC(df_tmc):
 
 def rename_columns(time_period, df_grouped):
     """Renames default columns for human readability, per AM/PM time period.
+    Args: time_period, which is user input `AM` or `PM`.
+          df_grouped, a pandas dataframe
+    Returns: df_final, a pandas dataframe with renamed columns.
     """
     df_final = df_grouped.rename(columns={
         'MEAN': time_period + '_SPEED',
@@ -45,6 +48,8 @@ def rename_columns(time_period, df_grouped):
 
 def reliability(df_rel):
     """Calculates realiability of speed measures.
+    Args: df_rel, a pandas dataframe.
+    Returns: df_rel with new column `RELIABILITY`.
     """
     df_rel['RELIABILITY'] = df_rel['MEAN_5'] / df_rel['MEAN']
     return df_rel
@@ -52,6 +57,8 @@ def reliability(df_rel):
 
 def congestion(df_congest):
     """Calculates congestion.
+    Args: df_congest, a pandas dataframe.
+    Returns: df_congest with new column `CONGESTION`.
     """
     df_congest['CONGESTION'] = df_congest['MEAN'] / df_congest['SPDLIMIT']
     return df_congest
@@ -85,6 +92,8 @@ def main(input):
     # Apply calculation functions
     df['MEAN_95'] = df['MEAN']
     df['MEAN_5'] = df['MEAN']
+    #print(df.loc[df['TMC'] == '114N04444'])
+    
     df = group_TMC(df)
     df = congestion(df)
     df = reliability(df)
@@ -92,7 +101,7 @@ def main(input):
 
     endTime = dt.datetime.now()
     df.to_csv(input + '_speeds.csv')
-
+    
     print("Script finished in {0}.".format(endTime - startTime))
     print(df.shape)
 
