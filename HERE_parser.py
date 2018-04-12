@@ -102,7 +102,7 @@ def main(input):
     df = rename_columns(sys.argv[1], df)
 
     endTime = dt.datetime.now()
-    df.to_csv(input + '_speeds.csv')
+    df.to_csv(input + '_speeds.csv', index=False)
     print('Script finished in {0}.'.format(endTime - startTime))
     print('Final CSV contains {0} rows.'.format(df.shape[0]))
 

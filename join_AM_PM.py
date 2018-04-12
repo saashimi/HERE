@@ -15,4 +15,4 @@ df_pm = pd.read_csv(
 
 df = pd.merge(df_am, df_pm, on='TMC', how='left')
 
-df.to_csv('HERE_AM_PM.csv')
+df.to_csv('HERE_AM_PM.csv', index=False)
