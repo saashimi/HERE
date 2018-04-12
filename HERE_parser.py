@@ -5,7 +5,7 @@ Script by Kevin Saavedra, Metro, kevin.saavedra@oregonmetro.gov
 Useage:
     >>> python HERE_parser.py <AM or PM>
 This script is intended to be used before join_AM_pm.py, which will join the
-AM and PM speed calculations into a single CSV file. 
+AM and PM speed calculations into a single CSV file.
 """
 
 import os
@@ -53,7 +53,7 @@ def reliability(df_rel):
     Args: df_rel, a pandas dataframe.
     Returns: df_rel with new column `RELIABILITY`.
     """
-    df_rel['RELIABILITY'] = df_rel['MEAN_5'] / df_rel['MEAN']
+    df_rel['RELIABILITY'] = (df_rel['MEAN_5'] / df_rel['MEAN']).round(3)
     return df_rel
 
 
@@ -62,7 +62,8 @@ def congestion(df_congest):
     Args: df_congest, a pandas dataframe.
     Returns: df_congest with new column `CONGESTION`.
     """
-    df_congest['CONGESTION'] = df_congest['MEAN'] / df_congest['SPDLIMIT']
+    df_congest['CONGESTION'] = (df_congest['MEAN'] /
+                                df_congest['SPDLIMIT']).round(3)
     return df_congest
 
 
@@ -81,21 +82,21 @@ def main(input):
     if input == 'PM':
         epochs = [68, 69, 70, 71]
 
+    # Concatenate all files into single dataframe.
     for csv_file in os.listdir(drive_path):
         df_temp = pd.read_csv(
                     os.path.join(
                         os.path.dirname(__file__), drive_path + csv_file))
-
         df_temp = df_temp[df_temp['EPOCH-15MIN'].isin(epochs)]
-
         df = pd.concat([df, df_temp])
         print('Adding {} to dataset.'.format(csv_file))
 
     # Apply calculation functions
+    df['MEAN'] = df['MEAN'].round(4)
     df['MEAN_95'] = df['MEAN']
     df['MEAN_5'] = df['MEAN']
-    #print(df.loc[df['TMC'] == '114N04444'])
-    
+    # print(df.loc[df['TMC'] == '114N04444'])
+
     df = group_TMC(df)
     df = congestion(df)
     df = reliability(df)
@@ -103,9 +104,8 @@ def main(input):
 
     endTime = dt.datetime.now()
     df.to_csv(input + '_speeds.csv')
-    
-    print("Script finished in {0}.".format(endTime - startTime))
-    print(df.shape)
+    print('Script finished in {0}.'.format(endTime - startTime))
+    print('Final CSV contains {0} rows.'.format(df.shape[0]))
 
 
 if __name__ == '__main__':
