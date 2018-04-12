@@ -22,7 +22,7 @@ def group_TMC(df_tmc):
     """
     tmc_operations = ({'LENGTH': 'max',
                        'SPDLIMIT': 'max',
-                       'FREEFLOW': 'mean', 
+                       'FREEFLOW': 'mean',
                        'MEAN': 'mean',
                        'MEAN_5': lambda x: np.percentile(x, 5),
                        'MEAN_95': lambda x: np.percentile(x, 95),
