@@ -92,7 +92,6 @@ def main(input):
         print('Adding {} to dataset.'.format(csv_file))
 
     # Apply calculation functions
-    df['MEAN'] = df['MEAN'].round(4)
     df['MEAN_95'] = df['MEAN']
     df['MEAN_5'] = df['MEAN']
     # print(df.loc[df['TMC'] == '114N04444'])
