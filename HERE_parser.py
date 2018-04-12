@@ -4,6 +4,8 @@ Calculates mean and 5th and 95th percentile speeds per AM and PM peak.
 Script by Kevin Saavedra, Metro, kevin.saavedra@oregonmetro.gov
 Useage:
     >>> python HERE_parser.py <AM or PM>
+This script is intended to be used before join_AM_pm.py, which will join the
+AM and PM speed calculations into a single CSV file. 
 """
 
 import os
@@ -18,12 +20,12 @@ def group_TMC(df_tmc):
     Args: df_tmc, a pandas dataframe.
     Returns: df_tmc, a pandas dataframe grouped by TMC.
     """
-    tmc_operations = ({'MEAN': 'mean',
+    tmc_operations = ({'LENGTH': 'max',
+                       'SPDLIMIT': 'max',
+                       'FREEFLOW': 'mean', 
+                       'MEAN': 'mean',
                        'MEAN_5': lambda x: np.percentile(x, 5),
                        'MEAN_95': lambda x: np.percentile(x, 95),
-                       'SPDLIMIT': 'max',
-                       'LENGTH': 'max',
-                       'FREEFLOW': 'mean',
                        'CONFIDENCE': 'mean'})
     df_tmc = df_tmc.groupby('TMC', as_index=False).agg(tmc_operations)
     return df_tmc
@@ -36,9 +38,9 @@ def rename_columns(time_period, df_grouped):
     Returns: df_final, a pandas dataframe with renamed columns.
     """
     df_final = df_grouped.rename(columns={
-        'MEAN': time_period + '_SPEED',
-        'MEAN_5': time_period + '_MEAN_5TH_PCTILE',
-        'MEAN_95': time_period + '_MEAN_95TH_PCTILE',
+        'MEAN': time_period + '_MEAN_SPEED',
+        'MEAN_5': time_period + '_SPEED_5TH_PCTILE',
+        'MEAN_95': time_period + '_SPEED_95TH_PCTILE',
         'CONFIDENCE': time_period + '_CONFIDENCE',
         'RELIABILITY': time_period + '_RELIABILITY',
         'CONGESTION': time_period + '_CONGESTION'
