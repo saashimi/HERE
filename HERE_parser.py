@@ -71,8 +71,8 @@ def main(input):
     """Main script to calculate HERE speed averages."""
     startTime = dt.datetime.now()
     pd.set_option('display.max_rows', None)
-    drive_path = 'G:/HERE/data_no_gap_fill/'
-    # drive_path = 'G:/HERE/data_gap_filled/'
+    drive_path = 'G:/corridors/swcorr/ris/HERE_data/data_no_gap_fill/'
+    # drive_path = 'G:/corridors/swcorr/ris/HERE_data/data_gap_filled/'
 
     df = pd.DataFrame()  # Create empty dataframe
     epochs = []
