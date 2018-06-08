@@ -1,6 +1,5 @@
 """
-Script to calculate average HERE speeds.
-Calculates total congestion hours per link.
+Script to calculates total congestion hours per link.
 Script by Kevin Saavedra, Metro, kevin.saavedra@oregonmetro.gov
 Useage:
     >>> python HERE_parser_all_day.py
@@ -8,7 +7,6 @@ Useage:
 """
 
 import os
-import sys
 import pandas as pd
 import numpy as np
 import datetime as dt
