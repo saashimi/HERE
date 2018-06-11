@@ -37,7 +37,7 @@ def group_TMC(df_tmc):
                        'SPDLIMIT': 'max',
                        'FREEFLOW': 'mean',
                        'HR_35_PCT_SPDLMT': 'sum',
-                       'HR_35_50_PCT_SPDLMT': 'sum',                       
+                       'HR_50_PCT_SPDLMT': 'sum',                       
                        'MEAN': 'mean',
                        'CONFIDENCE': 'mean'})
     df_tmc = df_tmc.groupby('TMC', as_index=False).agg(tmc_operations)
@@ -50,15 +50,14 @@ def spd_threshhold(df_spdt):
     Args: df_spdt, a pandas dataframe.
     Returns: df_spdt with new columns:
         `HR_35_PCT_SPDLMT`
-        `HR_35_50_PCT_SPDLMT`
+        `HR_50_PCT_SPDLMT`
     """
     pct_spdlmt_35 = .35 * df_spdt['SPDLIMIT'].round(3)
     pct_spdlmt_50 = .5 * df_spdt['SPDLIMIT'].round(3)
     df_spdt['HR_35_PCT_SPDLMT'] = np.where(
         df_spdt['MEAN'] < pct_spdlmt_35, .25, 0)
-    df_spdt['HR_35_50_PCT_SPDLMT'] = np.where((
-        (df_spdt['MEAN'] >= pct_spdlmt_35) & (df_spdt['MEAN'] < pct_spdlmt_50)
-        ), .25, 0)
+    df_spdt['HR_50_PCT_SPDLMT'] = np.where(
+        df_spdt['MEAN'] < pct_spdlmt_50, .25, 0)
 
     return df_spdt
 
