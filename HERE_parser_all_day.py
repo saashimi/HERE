@@ -37,7 +37,8 @@ def group_TMC(df_tmc):
                        'SPDLIMIT': 'max',
                        'FREEFLOW': 'mean',
                        'HR_35_PCT_SPDLMT': 'sum',
-                       'HR_50_PCT_SPDLMT': 'sum',                       
+                       'HR_50_PCT_SPDLMT': 'sum',
+                       'HR_75_PCT_SPDLMT': 'sum',
                        'MEAN': 'mean',
                        'CONFIDENCE': 'mean'})
     df_tmc = df_tmc.groupby('TMC', as_index=False).agg(tmc_operations)
@@ -45,20 +46,24 @@ def group_TMC(df_tmc):
 
 
 def spd_threshhold(df_spdt):
-    """Calculates total hours of congestion based on 35% and 50% speed limit 
-    speeds.
+    """Calculates total hours of congestion based on 35%, 50%, and 75% speed 
+    limit speeds. Data is given in .25 hr (15-min) increments.
     Args: df_spdt, a pandas dataframe.
     Returns: df_spdt with new columns:
         `HR_35_PCT_SPDLMT`
         `HR_50_PCT_SPDLMT`
+        `HR_75_PCT_SPDLMT`
     """
     pct_spdlmt_35 = .35 * df_spdt['SPDLIMIT'].round(3)
     pct_spdlmt_50 = .5 * df_spdt['SPDLIMIT'].round(3)
+    pct_spdlmt_75 = .75 * df_spdt['SPDLIMIT'].round(3)
+    # Condition tallies data in .25-hr increments.
     df_spdt['HR_35_PCT_SPDLMT'] = np.where(
         df_spdt['MEAN'] < pct_spdlmt_35, .25, 0)
     df_spdt['HR_50_PCT_SPDLMT'] = np.where(
         df_spdt['MEAN'] < pct_spdlmt_50, .25, 0)
-
+    df_spdt['HR_75_PCT_SPDLMT'] = np.where(
+        df_spdt['MEAN'] < pct_spdlmt_75, .25, 0)
     return df_spdt
 
 
@@ -85,13 +90,11 @@ def main():
     df = group_TMC(df)
     df = rename_columns(df)
 
-
     endTime = dt.datetime.now()
-    df.to_csv('all_day_congestion.csv', index=False)
+    df.to_csv('all_day_congestion_0918.csv', index=False)
     print('Script finished in {0}.'.format(endTime - startTime))
     print('Final CSV contains {0} rows.'.format(df.shape[0]))
 
 
 if __name__ == '__main__':
     main()
-
