@@ -21,6 +21,7 @@ def group_TMC(df_tmc):
     Returns: df_tmc, a pandas dataframe grouped by TMC.
     """
     tmc_operations = ({'LENGTH': 'max',
+                       'SPDLIMIT': 'max',
                        'FREEFLOW': 'mean',
                        'MEAN': 'mean',
                        'MEAN_5': lambda x: np.percentile(x, 5),
@@ -42,6 +43,7 @@ def rename_columns(time_period, df_grouped):
         'MEAN_95': time_period + '_SPEED_95TH_PCTILE',
         'CONFIDENCE': time_period + '_CONFIDENCE',
         'RELIABILITY': time_period + '_RELIABILITY',
+        'CONGESTION': time_period + '_CONGESTION'
     })
     return df_final
 
@@ -53,6 +55,28 @@ def reliability(df_rel):
     """
     df_rel['RELIABILITY'] = (df_rel['MEAN_5'] / df_rel['MEAN']).round(3)
     return df_rel
+
+
+def revise_speed_limits(df_lmt):
+    """Update existing dataset with revised speed limits per TMC. Searches for
+    NaN values in `SPDLIMIT` against `CHECK_SPDLIMIT` column in revised dataset.
+    """
+    file_path = 'G:/corridors/swcorr/ris/HERE_data/Metro_revised_091918/'
+    df_new_lmt = pd.read_csv(os.path.join(file_path, 'tmc_speedlimit.csv'))
+    df_revised = pd.merge(df_lmt, df_new_lmt, on='TMC', how='left')
+    df_revised['REV_SPD'] = np.where(pd.isnull(df_revised['SPDLIMIT']), df_revised['CHECK_SPDLIMIT'], df_revised['SPDLIMIT'])
+    
+    return df_revised
+
+
+def congestion(df_congest):
+    """Calculates congestion.
+    Args: df_congest, a pandas dataframe.
+    Returns: df_congest with new column `CONGESTION`.
+    """
+    df_congest['CONGESTION'] = (df_congest['MEAN'] /
+                                df_congest['SPDLIMIT']).round(3)
+    return df_congest
 
 
 def main(input):
@@ -91,9 +115,9 @@ def main(input):
     # Apply calculation functions
     df['MEAN_95'] = df['MEAN']
     df['MEAN_5'] = df['MEAN']
-    # print(df.loc[df['TMC'] == '114N04444'])
-
+    df = revise_speed_limits(df)
     df = group_TMC(df)
+    df = congestion(df)
     df = reliability(df)
     df = rename_columns(sys.argv[1], df)
 

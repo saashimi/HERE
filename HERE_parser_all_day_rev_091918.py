@@ -18,7 +18,7 @@ def rename_columns(df_grouped):
     Returns: df_final, a pandas dataframe with renamed columns.
     """
     df_final = df_grouped.rename(columns={
-        'REV_SPEED' : 'SPDLIMIT',
+        'REV_SPD' : 'SPDLIMIT',
         'MEAN': 'MEAN_SPEED',
         'MEAN_5': 'SPEED_5TH_PCTILE',
         'MEAN_95': 'SPEED_95TH_PCTILE',
