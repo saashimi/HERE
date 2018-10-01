@@ -57,6 +57,25 @@ def reliability(df_rel):
     return df_rel
 
 
+def revise_speed_limits(df_lmt):
+    """Update existing dataset with revised speed limits per TMC. Searches for
+    NaN values in `SPDLIMIT` against `CHECK_SPDLIMIT` column in revised dataset.
+    """
+    file_path = 'G:/corridors/swcorr/ris/HERE_data/Metro_revised_091918/'
+    df_new_lmt = pd.read_csv(os.path.join(file_path, 'tmc_speedlimit.csv'))
+    
+    tmc_operations = ({'CHECK_SPDLIMIT': 'max'})
+    df_new_lmt = df_new_lmt.groupby('TMC', as_index=False).agg(tmc_operations)
+    
+    df_revised = pd.merge(df_lmt, df_new_lmt, on='TMC', how='left')
+    df_revised['REV_SPD'] = np.where(
+                                     pd.isnull(df_revised['SPDLIMIT']), 
+                                     df_revised['CHECK_SPDLIMIT'], 
+                                     df_revised['SPDLIMIT'])
+    
+    return df_revised
+
+
 def congestion(df_congest):
     """Calculates congestion.
     Args: df_congest, a pandas dataframe.
@@ -82,27 +101,35 @@ def main(input):
     if input == 'PM':
         epochs = [68, 69, 70, 71]
 
+    # Revised script for 2017 data only.
+    files_2017 = ['HERE_DA_15674.csv',
+                  'HERE_DA_15675.csv',
+                  'HERE_DA_15680.csv',
+                  'HERE_DA_15681.csv',
+                  'HERE_DA_15686.csv',
+                  'HERE_DA_15687.csv']
+    
     # Concatenate all files into single dataframe.
     for csv_file in os.listdir(drive_path):
-        df_temp = pd.read_csv(
-                    os.path.join(
-                        os.path.dirname(__file__), drive_path + csv_file))
-        df_temp = df_temp[df_temp['EPOCH-15MIN'].isin(epochs)]
-        df = pd.concat([df, df_temp])
-        print('Adding {} to dataset.'.format(csv_file))
+        if csv_file in files_2017:
+            df_temp = pd.read_csv(
+                        os.path.join(
+                            os.path.dirname(__file__), drive_path + csv_file))
+            df_temp = df_temp[df_temp['EPOCH-15MIN'].isin(epochs)]
+            df = pd.concat([df, df_temp])
+            print('Adding {} to dataset.'.format(csv_file))
 
     # Apply calculation functions
     df['MEAN_95'] = df['MEAN']
     df['MEAN_5'] = df['MEAN']
-    # print(df.loc[df['TMC'] == '114N04444'])
-
+    df = revise_speed_limits(df)
     df = group_TMC(df)
     df = congestion(df)
     df = reliability(df)
     df = rename_columns(sys.argv[1], df)
 
     endTime = dt.datetime.now()
-    df.to_csv(input + '_speeds.csv', index=False)
+    df.to_csv(input + '_speeds_091918.csv', index=False)
     print('Script finished in {0}.'.format(endTime - startTime))
     print('Final CSV contains {0} rows.'.format(df.shape[0]))
 
