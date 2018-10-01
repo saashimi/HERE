@@ -74,8 +74,15 @@ def revise_speed_limits(df_lmt):
     """
     file_path = 'G:/corridors/swcorr/ris/HERE_data/Metro_revised_091918/'
     df_new_lmt = pd.read_csv(os.path.join(file_path, 'tmc_speedlimit.csv'))
+    
+    tmc_operations = ({'CHECK_SPDLIMIT': 'max'})
+    df_new_lmt = df_new_lmt.groupby('TMC', as_index=False).agg(tmc_operations)
+    
     df_revised = pd.merge(df_lmt, df_new_lmt, on='TMC', how='left')
-    df_revised['REV_SPD'] = np.where(pd.isnull(df_revised['SPDLIMIT']), df_revised['CHECK_SPDLIMIT'], df_revised['SPDLIMIT'])
+    df_revised['REV_SPD'] = np.where(
+                                     pd.isnull(df_revised['SPDLIMIT']), 
+                                     df_revised['CHECK_SPDLIMIT'], 
+                                     df_revised['SPDLIMIT'])
     
     return df_revised
 
@@ -85,7 +92,6 @@ def main():
     startTime = dt.datetime.now()
     pd.set_option('display.max_rows', None)
     drive_path = 'G:/corridors/swcorr/ris/HERE_data/data_no_gap_fill/'
-    # drive_path = 'G:/corridors/swcorr/ris/HERE_data/data_gap_filled/'
 
     df = pd.DataFrame()  # Create empty dataframe
 
@@ -105,10 +111,19 @@ def main():
             df = pd.concat([df, df_temp])
             print('Adding {} to dataset.'.format(csv_file))
 
+    df = df.drop_duplicates()
+    print(df.shape)
+    (df.loc[df['TMC'] == '114N12291']).to_csv('114N12291_test.csv')
+
+    #print(list(set(df['EPOCH-15MIN'])))
+
     # Apply calculation functions
-    # print(df.loc[df['TMC'] == '114N04444'])
     df = revise_speed_limits(df)
     df = spd_threshhold(df)
+    print(df.shape)
+
+    #df.to_csv('all_day_tally.csv', index=False)
+
     df = group_TMC(df)
     df = rename_columns(df)
 

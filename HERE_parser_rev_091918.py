@@ -63,8 +63,15 @@ def revise_speed_limits(df_lmt):
     """
     file_path = 'G:/corridors/swcorr/ris/HERE_data/Metro_revised_091918/'
     df_new_lmt = pd.read_csv(os.path.join(file_path, 'tmc_speedlimit.csv'))
+    
+    tmc_operations = ({'CHECK_SPDLIMIT': 'max'})
+    df_new_lmt = df_new_lmt.groupby('TMC', as_index=False).agg(tmc_operations)
+    
     df_revised = pd.merge(df_lmt, df_new_lmt, on='TMC', how='left')
-    df_revised['REV_SPD'] = np.where(pd.isnull(df_revised['SPDLIMIT']), df_revised['CHECK_SPDLIMIT'], df_revised['SPDLIMIT'])
+    df_revised['REV_SPD'] = np.where(
+                                     pd.isnull(df_revised['SPDLIMIT']), 
+                                     df_revised['CHECK_SPDLIMIT'], 
+                                     df_revised['SPDLIMIT'])
     
     return df_revised
 
